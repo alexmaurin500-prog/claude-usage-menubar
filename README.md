@@ -9,7 +9,9 @@ Deux variantes :
 
 ## Comment ça marche
 
-Les scripts ne s'authentifient **pas** avec une clé API Anthropic. À la place, ils lisent les cookies de session de **Safari** pour `claude.ai` via [`browser-cookie3`](https://pypi.org/project/browser-cookie3/), puis appellent l'endpoint interne `https://claude.ai/api/organizations/{org_id}/usage` en se faisant passer pour le client web.
+Les scripts ne s'authentifient **pas** avec une clé API Anthropic. À la place, ils lisent les cookies de session pour `claude.ai` via [`browser-cookie3`](https://pypi.org/project/browser-cookie3/), puis appellent l'endpoint interne `https://claude.ai/api/organizations/{org_id}/usage` en se faisant passer pour le client web.
+
+Les navigateurs suivants sont détectés automatiquement (dans cet ordre) : **Safari**, **Chrome**, **Firefox**. Le premier navigateur connecté à claude.ai est utilisé.
 
 > ⚠️ **Non officiel.** Cet endpoint n'est pas une API publique d'Anthropic. Il peut changer ou disparaître à tout moment, et ce projet n'est pas affilié à Anthropic. Utilisation à vos risques.
 
@@ -17,7 +19,7 @@ Les scripts ne s'authentifient **pas** avec une clé API Anthropic. À la place,
 
 - macOS
 - Python 3.9+
-- Une session active sur [claude.ai](https://claude.ai) dans **Safari**
+- Une session active sur [claude.ai](https://claude.ai) dans **Safari**, **Chrome** ou **Firefox**
 - **Accès complet au disque** accordé à SwiftBar (variante 1) ou au terminal/app qui lance le script (variante 2), dans *Réglages Système → Confidentialité et sécurité → Accès complet au disque*
 
 ## Installation

@@ -8,7 +8,7 @@
 # Prérequis :
 #   - Python 3
 #   - pip3 install browser-cookie3 requests
-#   - être connecté à claude.ai dans Safari
+#   - être connecté à claude.ai dans Safari, Chrome ou Firefox
 #   - Accès complet au disque autorisé pour SwiftBar (Réglages → Confidentialité)
 
 import sys
@@ -22,6 +22,28 @@ except ImportError:
     print("---")
     print("pip3 install browser-cookie3 requests | bash=pip3 param1=install param2=browser-cookie3 param3=requests terminal=true")
     sys.exit(0)
+
+BROWSERS = [
+    ("Safari",  browser_cookie3.safari),
+    ("Chrome",  browser_cookie3.chrome),
+    ("Firefox", browser_cookie3.firefox),
+]
+
+def get_claude_cookies():
+    errors = []
+    for name, fn in BROWSERS:
+        try:
+            cookies = fn(domain_name=".claude.ai")
+            jar = {}
+            session = requests.Session()
+            for c in cookies:
+                session.cookies.set(c.name, c.value, domain=c.domain)
+                jar[c.name] = c.value
+            if jar.get("lastActiveOrg"):
+                return session, jar, name
+        except Exception as e:
+            errors.append(f"{name}: {e}")
+    return None, None, "\n".join(errors)
 
 def bar_visual(pct, width=10):
     filled = round(pct / 100 * width)
@@ -43,19 +65,15 @@ def format_reset(iso):
         return iso
 
 try:
-    cookies = browser_cookie3.safari(domain_name=".claude.ai")
-    session = requests.Session()
-    jar = {}
-    for c in cookies:
-        session.cookies.set(c.name, c.value, domain=c.domain)
-        jar[c.name] = c.value
-
-    org_id = jar.get("lastActiveOrg")
-    if not org_id:
+    session, jar, browser_name = get_claude_cookies()
+    if not session:
         print("⚠ Claude | color=red")
         print("---")
-        print("Connectez-vous à claude.ai dans Safari")
+        print("Connectez-vous à claude.ai (Safari/Chrome/Firefox)")
+        print(f"Détails: {browser_name}")
         sys.exit(0)
+
+    org_id = jar.get("lastActiveOrg")
 
     resp = session.get(
         f"https://claude.ai/api/organizations/{org_id}/usage",
@@ -105,7 +123,7 @@ try:
 except browser_cookie3.BrowserCookieError as e:
     print("⚠ Claude | color=red")
     print("---")
-    print("Accès cookies Safari refusé")
+    print("Accès cookies refusé")
     print("Réglages Système → Confidentialité → Accès complet au disque → SwiftBar")
 except Exception as e:
     print("⚠ Claude | color=red")

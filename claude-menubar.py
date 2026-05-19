@@ -7,7 +7,7 @@
 # Prérequis :
 #   - Python 3
 #   - pip3 install browser-cookie3 requests rumps
-#   - être connecté à claude.ai dans Safari
+#   - être connecté à claude.ai dans Safari, Chrome ou Firefox
 #   - Accès complet au disque autorisé pour le terminal/app qui lance le script
 #
 # Lancer : python3 claude-menubar.py
@@ -22,6 +22,12 @@ try:
 except ImportError:
     rumps.App("⚠ Claude").run()
     raise SystemExit
+
+BROWSERS = [
+    ("Safari",  browser_cookie3.safari),
+    ("Chrome",  browser_cookie3.chrome),
+    ("Firefox", browser_cookie3.firefox),
+]
 
 def color_emoji(pct):
     if pct >= 80:
@@ -40,16 +46,25 @@ def format_reset(iso):
 
 def fetch_usage():
     try:
-        cookies = browser_cookie3.safari(domain_name=".claude.ai")
-        session = requests.Session()
+        session = None
         jar = {}
-        for c in cookies:
-            session.cookies.set(c.name, c.value, domain=c.domain)
-            jar[c.name] = c.value
+        for name, fn in BROWSERS:
+            try:
+                cookies = fn(domain_name=".claude.ai")
+                jar = {}
+                session = requests.Session()
+                for c in cookies:
+                    session.cookies.set(c.name, c.value, domain=c.domain)
+                    jar[c.name] = c.value
+                if jar.get("lastActiveOrg"):
+                    break
+                session = None
+            except Exception:
+                continue
 
         org_id = jar.get("lastActiveOrg")
-        if not org_id:
-            return None, "Non connecté"
+        if not session or not org_id:
+            return None, "Non connecté (Safari/Chrome/Firefox)"
 
         resp = session.get(
             f"https://claude.ai/api/organizations/{org_id}/usage",
