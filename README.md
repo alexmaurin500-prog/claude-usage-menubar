@@ -2,6 +2,10 @@
 
 Track your Claude usage (5h / 7d / extra credits) in the macOS menu bar or Windows/Linux system tray.
 
+<p align="center">
+  <img src="assets/screenshot.png" alt="Claude Usage Widget" width="400">
+</p>
+
 Three options depending on your setup:
 
 | | macOS (native) | macOS (SwiftBar) | Windows / Linux |
