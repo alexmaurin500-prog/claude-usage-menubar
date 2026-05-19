@@ -26,7 +26,9 @@ Browsers auto-detected: **Safari**, **Chrome**, **Firefox** (+ **Edge** on Windo
 
 - Python 3.9+
 - Logged into [claude.ai](https://claude.ai) in any supported browser
-- macOS: **Full Disk Access** granted to SwiftBar / Terminal (*System Settings > Privacy & Security > Full Disk Access*)
+- **macOS**: Full Disk Access granted to SwiftBar / Terminal (*System Settings > Privacy & Security > Full Disk Access*)
+- **Windows**: Chrome, Firefox or Edge with an active claude.ai session
+- **Linux**: Chrome or Firefox with an active claude.ai session
 
 ## Install
 
