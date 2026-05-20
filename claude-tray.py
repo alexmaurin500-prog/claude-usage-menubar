@@ -30,17 +30,22 @@ except ImportError as e:
 
 REFRESH_INTERVAL = 300
 
-BROWSERS = [
-    ("Safari", browser_cookie3.safari),
-    ("Chrome", browser_cookie3.chrome),
-    ("Firefox", browser_cookie3.firefox),
-]
+def _get_browsers():
+    """Return browser list adapted to the current OS."""
+    browsers = []
+    os_name = platform.system()
+    if os_name == "Darwin":
+        browsers.append(("Safari", browser_cookie3.safari))
+    browsers.append(("Chrome", browser_cookie3.chrome))
+    browsers.append(("Firefox", browser_cookie3.firefox))
+    if os_name == "Windows":
+        try:
+            browsers.append(("Edge", browser_cookie3.edge))
+        except AttributeError:
+            pass
+    return browsers
 
-if platform.system() == "Windows":
-    try:
-        BROWSERS.append(("Edge", browser_cookie3.edge))
-    except AttributeError:
-        pass
+BROWSERS = _get_browsers()
 
 
 def fetch_usage():
@@ -83,13 +88,27 @@ def make_icon(text, color):
     img = Image.new("RGBA", (64, 64), (0, 0, 0, 0))
     draw = ImageDraw.Draw(img)
     draw.rounded_rectangle([2, 2, 62, 62], radius=12, fill=color)
-    try:
-        font = ImageFont.truetype("/System/Library/Fonts/Helvetica.ttc", 28)
-    except (OSError, IOError):
+    font = None
+    os_name = platform.system()
+    font_candidates = []
+    if os_name == "Darwin":
+        font_candidates = ["/System/Library/Fonts/Helvetica.ttc",
+                           "/System/Library/Fonts/SFNSMono.ttf"]
+    elif os_name == "Windows":
+        font_candidates = ["C:/Windows/Fonts/arial.ttf",
+                           "C:/Windows/Fonts/segoeui.ttf"]
+    else:  # Linux
+        font_candidates = ["/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+                           "/usr/share/fonts/TTF/DejaVuSans.ttf",
+                           "/usr/share/fonts/truetype/ubuntu/Ubuntu-R.ttf"]
+    for fp in font_candidates:
         try:
-            font = ImageFont.truetype("arial.ttf", 28)
+            font = ImageFont.truetype(fp, 28)
+            break
         except (OSError, IOError):
-            font = ImageFont.load_default()
+            continue
+    if font is None:
+        font = ImageFont.load_default()
     bbox = draw.textbbox((0, 0), text, font=font)
     tw, th = bbox[2] - bbox[0], bbox[3] - bbox[1]
     x = (64 - tw) // 2
