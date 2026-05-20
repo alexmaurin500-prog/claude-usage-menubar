@@ -6,13 +6,13 @@ Track your Claude usage (5h / 7d / extra credits) in the macOS menu bar or Windo
   <img src="assets/screenshot.png" alt="Claude Usage Widget" width="400">
 </p>
 
-Three options depending on your setup:
+Two options depending on your setup:
 
-| | macOS (native) | macOS (SwiftBar) | Windows / Linux |
-|---|---|---|---|
-| **File** | `ClaudeUsage/` | `claude-usage.5m.py` | `claude-tray.py` |
-| **Look** | Native progress bars | Text in menu bar | Icon in system tray |
-| **Requires** | Xcode CLI tools | [SwiftBar](https://github.com/swiftbar/SwiftBar) | Python + pystray |
+| | macOS | Windows / Linux |
+|---|---|---|
+| **File** | `ClaudeUsage` + `claude-usage.5m.py` | `claude-tray.py` |
+| **Look** | Native progress bars | Icon in system tray |
+| **Requires** | Python 3.9+ | Python 3.9+ + pystray |
 
 ## How it works
 
@@ -26,7 +26,7 @@ Browsers auto-detected: **Safari**, **Chrome**, **Firefox** (+ **Edge** on Windo
 
 - Python 3.9+
 - Logged into [claude.ai](https://claude.ai) in any supported browser
-- **macOS**: Full Disk Access granted to SwiftBar / Terminal (*System Settings > Privacy & Security > Full Disk Access*)
+- **macOS**: Full Disk Access granted to Terminal / the app running the script (*System Settings > Privacy & Security > Full Disk Access*)
 - **Windows**: Chrome, Firefox or Edge with an active claude.ai session
 - **Linux**: Chrome or Firefox with an active claude.ai session
 
@@ -36,25 +36,27 @@ Browsers auto-detected: **Safari**, **Chrome**, **Firefox** (+ **Edge** on Windo
 pip3 install -r requirements.txt
 ```
 
-### Option 1 — Native macOS app (recommended on Mac)
+### macOS — Native menu bar app (recommended)
 
-Compile the Swift app, then place it next to the Python script:
+1. Download `ClaudeUsage` and `claude-usage.5m.py`
+2. Place both files in the same folder
+3. Edit line 2 of `ClaudeUsage` paths if needed (default: `~/Documents/swift bar/`)
+4. Run:
+   ```bash
+   chmod +x ClaudeUsage claude-usage.5m.py
+   ./ClaudeUsage
+   ```
 
-```bash
-cd ClaudeUsage
-swiftc -parse-as-library -o ClaudeUsage claude-usage-app.swift -framework Cocoa -framework QuartzCore
-cp ../claude-usage.5m.py .
-./ClaudeUsage
-```
+> **Note:** The `ClaudeUsage` binary is compiled for Apple Silicon (arm64). Intel Mac users can use the SwiftBar option below.
 
-### Option 2 — SwiftBar plugin (macOS)
+### macOS — SwiftBar plugin (alternative)
 
 1. Install [SwiftBar](https://github.com/swiftbar/SwiftBar).
 2. Copy `claude-usage.5m.py` to your SwiftBar plugin folder.
 3. `chmod +x claude-usage.5m.py`
 4. Refresh SwiftBar.
 
-### Option 3 — System tray (macOS / Windows / Linux)
+### Windows / Linux — System tray
 
 ```bash
 python3 claude-tray.py

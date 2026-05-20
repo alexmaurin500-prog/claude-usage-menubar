@@ -24,5 +24,6 @@ env/
 .idea/
 *.swp
 
-# Compiled binary (users build from source)
-ClaudeUsage/ClaudeUsage
+# Compiled binaries (local builds)
+*.o
+*.dSYM/
