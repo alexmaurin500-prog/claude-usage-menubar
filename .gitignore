@@ -24,6 +24,8 @@ env/
 .idea/
 *.swp
 
-# Compiled binaries (local builds)
+# Compiled binaries / build artifacts (shipped via GitHub Releases)
 *.o
 *.dSYM/
+*.dmg
+macos-app/build/
