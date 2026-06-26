@@ -23,6 +23,15 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     private var headerLabelExtra: NSMenuItem!
     private var progressItemExtra: NSMenuItem!
 
+    // Pulse the menu-bar icon when usage crosses this threshold (override
+    // with the CLAUDE_USAGE_ALERT_THRESHOLD env var).
+    private var alertThreshold: Double {
+        if let s = ProcessInfo.processInfo.environment["CLAUDE_USAGE_ALERT_THRESHOLD"],
+           let v = Double(s) { return v }
+        return 80.0
+    }
+    private var pulseTimer: Timer?
+
     // ── Script & Python resolution ───────────────────────────────────────────
     private var scriptPath: String {
         if let env = ProcessInfo.processInfo.environment["CLAUDE_USAGE_SCRIPT"] { return env }
@@ -142,6 +151,24 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         return .systemGreen
     }
 
+    // ── Alert pulse ──────────────────────────────────────────────────────────
+    private func startPulse() {
+        guard pulseTimer == nil else { return }
+        pulseTimer = Timer.scheduledTimer(withTimeInterval: 0.75, repeats: true) { [weak self] _ in
+            guard let button = self?.statusItem.button else { return }
+            NSAnimationContext.runAnimationGroup { ctx in
+                ctx.duration = 0.65
+                button.animator().alphaValue = button.alphaValue > 0.7 ? 0.35 : 1.0
+            }
+        }
+    }
+
+    private func stopPulse() {
+        pulseTimer?.invalidate()
+        pulseTimer = nil
+        statusItem.button?.alphaValue = 1.0
+    }
+
     @objc private func refreshClicked() { refresh() }
 
     @objc private func openUsage() {
@@ -214,8 +241,13 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 .font: NSFont.monospacedDigitSystemFont(ofSize: 12, weight: .medium),
                 .foregroundColor: color,
             ])
-        statusItem.button?.image = NSImage(systemSymbolName: "clock.arrow.circlepath", accessibilityDescription: "Claude Usage")
+
+        // High usage → switch to a warning icon and pulse to catch the eye.
+        let alert = dominant >= alertThreshold
+        let symbol = alert ? "exclamationmark.triangle.fill" : "clock.arrow.circlepath"
+        statusItem.button?.image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Claude Usage")
         statusItem.button?.imagePosition = .imageLeading
+        if alert { startPulse() } else { stopPulse() }
 
         progressItem5h.view = makeProgressRow(value: data.h5, color: colorFor(data.h5), label: "\(Int(data.h5))%")
         progressItem7d.view = makeProgressRow(value: data.d7, color: colorFor(data.d7), label: "\(Int(data.d7))%")
